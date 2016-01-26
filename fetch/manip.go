@@ -68,6 +68,28 @@ func GetRotatedImage(src io.Reader) (image.Image, string, error) {
 	return image, format, nil
 }
 
+
+func PickResizer(src io.Reader, c *CacheContext) (io.Reader, error) {
+	raw, err := ioutil.ReadAll(src)
+	if err != nil {
+		return nil, err
+	}
+
+	decodeReader := bytes.NewReader(raw)
+	_, format, err := image.Decode(decodeReader)
+	if err != nil {
+		return nil, err
+	}
+
+	data := bytes.NewReader(raw)
+	if format == "gif" {
+		return ResizeGif(data, c)
+	} else {
+		return Resize(data, c)
+	}
+}
+
+
 func Resize(src io.Reader, c *CacheContext) (io.Reader, error) {
 	raw, err := ioutil.ReadAll(src)
 	if err != nil {
